@@ -4,7 +4,9 @@ from flask import Flask,request
 from multiprocessing import Process,Manager
 from bs4 import BeautifulSoup as bs
 import time,requests,traceback,datetime,json,random,sys
+from language_detection import text_detection
 
+import language_detection
 from scraper import getUser,grabing
 class Scraper():
     def __init__(self,scraperNum,dburl,goal):
@@ -90,7 +92,6 @@ class Scraper():
             return 'success'
         except:
             # traceback.print_exc()
-            # print('fail on home')  
             return 'fail'
 
     def userPageScraper(self,userlinkPool,userInfoPipline): 
@@ -105,16 +106,10 @@ class Scraper():
             userInfo = getUser(soup)   
             linklist =soup.findAll('a','title')
             if ('W' in userInfo['follow'] or 'K' in userInfo['follow']) and 'W' in userInfo['like'] and len(linklist)>=10:
-            # if 'W' in userInfo['follow'] and len(linklist)>=10:
                 userInfo['longID'] = userlink.split('/')[-1]
-                # userInfo.pop('like')
-                # userInfo.pop('follow')
-                # print(userInfo)
                 userInfoPipline.put({'userInfo':userInfo,'links':[link['href'] for link in linklist[:10]]})
-            # return 
         except:
-            # traceback.print_exc()
-            # print('fail on users')      
+            # traceback.print_exc()   
             return      
             
     def postPageScraper(self,userInfoPipline,cookie):
@@ -149,7 +144,6 @@ class Scraper():
                 userInfo['posts'] = []
             
             requests.post(f"{self.dburl}/insert",json = {'id':'users','data':userInfo})       
-
 
     def antiDetect(self,response,url,stage):
         if 'https://www.xiaohongshu.com/website-login/error?redirectPath=' in response.url or response.status_code != 200:
