@@ -4,9 +4,8 @@ from flask import Flask,request
 from multiprocessing import Process,Manager
 from bs4 import BeautifulSoup as bs
 import time,requests,traceback,datetime,json,random,sys
-from language_detection import text_detection
 
-import language_detection
+from language_detection import text_detection
 from scraper import getUser,grabing
 class Scraper():
     def __init__(self,scraperNum,dburl,goal):
@@ -36,41 +35,42 @@ class Scraper():
             num = requests.get(f'{self.dburl}/count').content.decode("utf-8")
             requestnum = self.goal- int(num) # the num of post we need 
         while True:
-            progress= int(requests.get(f'{self.dburl}/count').content.decode("utf-8"))
-            if progress>=self.goal:
-                if not userInfoPipline.empty() or not userlinkPool.empty():
-                    while not userInfoPipline.empty():
-                        userInfoPipline.get()
-                    while not userlinkPool.empty():
-                        userlinkPool.get()
-                end = time.perf_counter()
-                sys.stdout.write("\033[K") 
-                print('\r Time is %4f hours '%((end -self.start)/3600),end = '\r')
-                return 
-            current = time.perf_counter()
-            
-            percent = ("{0:." + str(2) + "f}").format(100 * (progress/ float(int(num)+requestnum)))
-            speed =  ("{0:." + str(2) + "f}").format((progress-lastprogress)/(current-lasttime))
-            print(f'\r progress: {percent}% Completed, speed: {speed} p/s, len of both queue: {userlinkPool.qsize()}/{userInfoPipline.qsize()}  ', end = '\r')
-            lasttime = current
-            lastprogress = progress 
-            try:
-                cookie = cookies.pop(random.randint(0,len(cookies)-1))
-            except:
-                continue
-            if userInfoPipline.qsize() >= 1:
-                self.postPageScraper(userInfoPipline,cookie)
-            elif userlinkPool.qsize() >= 1:
-                self.userPageScraper(userlinkPool,userInfoPipline)
-            else:
-                res = self.homePageScraper(userlinkPool,cookie)
-                if res == 'empty':
-                    progress= int(requests.get(f'{self.dburl}/count').content.decode("utf-8"))
-                    if (int(progress)+random.randint(0,100))%37==0:
-                        cookies.append(cookie)
-                        cookie = self.updateCookie("https://www.xiaohongshu.com/explore?channel_id=homefeed_recommend")
-            cookies.append(cookie) 
+                progress= int(requests.get(f'{self.dburl}/count').content.decode("utf-8"))
+                if progress>=self.goal:
+                    if not userInfoPipline.empty() or not userlinkPool.empty():
+                        while not userInfoPipline.empty():
+                            userInfoPipline.get()
+                        while not userlinkPool.empty():
+                            userlinkPool.get()
+                    end = time.perf_counter()
+                    sys.stdout.write("\033[K") 
+                    print('\r Time is %4f hours '%((end -self.start)/3600),end = '\r')
+                    return 
+                current = time.perf_counter()
+                
+                percent = ("{0:." + str(2) + "f}").format(100 * (progress/ float(int(num)+requestnum)))
+                speed =  ("{0:." + str(2) + "f}").format((progress-lastprogress)/(current-lasttime))
+                print(f'\r progress: {percent}% Completed, speed: {speed} p/s, len of both queue: {userlinkPool.qsize()}/{userInfoPipline.qsize()}  ', end = '\r')
+                lasttime = current
+                lastprogress = progress 
+                try:
+                    cookie = cookies.pop(random.randint(0,len(cookies)-1))
+                except:
+                    continue
+                if userInfoPipline.qsize() >= 1:
+                    self.postPageScraper(userInfoPipline,cookie)
+                elif userlinkPool.qsize() >= 1:
+                    self.userPageScraper(userlinkPool,userInfoPipline)
+                else:
+                    res = self.homePageScraper(userlinkPool,cookie)
+                    if res == 'empty':
+                        progress= int(requests.get(f'{self.dburl}/count').content.decode("utf-8"))
+                        if (int(progress)+random.randint(0,100))%37==0:
+                            cookies.append(cookie)
+                            cookie = self.updateCookie("https://www.xiaohongshu.com/explore?channel_id=homefeed_recommend")
+                cookies.append(cookie) 
     
+        
     def homePageScraper(self,userlinkPool,cookie):
         url = "https://www.xiaohongshu.com/explore?channel_id=homefeed_recommend"
         headers = deepcopy(self.headers['htmlHeaders'])
@@ -104,12 +104,12 @@ class Scraper():
             response = self.antiDetect(response,userlink,'user')
             soup = bs(response.content,'html.parser')
             userInfo = getUser(soup)   
-            linklist =soup.findAll('a','title')
-            if ('W' in userInfo['follow'] or 'K' in userInfo['follow']) and 'W' in userInfo['like'] and len(linklist)>=10:
+            linklist =soup.findAll('a','cover ld mask')
+            if ('万' in userInfo['follow'] or '千' in userInfo['follow']) and '万' in userInfo['like'] and len(linklist)>=10:
                 userInfo['longID'] = userlink.split('/')[-1]
                 userInfoPipline.put({'userInfo':userInfo,'links':[link['href'] for link in linklist[:10]]})
         except:
-            # traceback.print_exc()   
+            traceback.print_exc()   
             return      
             
     def postPageScraper(self,userInfoPipline,cookie):
@@ -125,7 +125,7 @@ class Scraper():
                 url = 'https://www.xiaohongshu.com'+link
                 response = requests.get(url,headers = headers)
                 response = self.antiDetect(response,url,'post')
-
+                print(url)
                 soup = bs(response.content.decode('utf-8'),'html.parser')
                 idx,post= grabing(soup,self,userInfo,idx)
                 if not post:

@@ -11,7 +11,7 @@
         "sec-fetch-site": "same-origin",
         "sec-fetch-user": "?1",
         "upgrade-insecure-requests": "1",
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
     },
     "cookie": "abRequestId=6cb1ec56-779e-568e-bdf7-b87037699d68; a1=18cd7fea021brvkco87lhltzh5f8g6cx6bpo22akj30000313848; webId=529f96e525dec4769e99e9f75b35abe0; gid=yYSfWid0WdKiyYSfWid08DJ0JyDFhTSlYW1xUTV19ux2ilq8YkKSCJ888qyqY4Y8WjJqKJjJ; cache_feeds=[]; xsecappid=xhs-pc-web; web_session=0400697918e7f1e4f6f5b3ea20344b649b4527; webBuild=4.11.0; unread={%22ub%22:%2266155557000000000401a778%22%2C%22ue%22:%226613be23000000001b00a5df%22%2C%22uc%22:30}; websectiga=82e85efc5500b609ac1166aaf086ff8aa4261153a448ef0be5b17417e4512f28; sec_poison_id=84cf6adc-65f1-48a9-86a6-6b7df8c7dc5b"
 }
